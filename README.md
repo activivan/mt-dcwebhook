@@ -16,7 +16,7 @@ To install this mod, you have two options:
   git clone https://github.com/activivan/mt-dcwebhook.git
   ```
 
-* Download this repository as an Archive: https://github.com/activivan/mt-dcwebhook/archive/refs/heads/main.zip 
+* Download this repository as an Archive: https://github.com/activivan/mt-dcwebhook/archive/refs/heads/master.zip 
 
   Extract the archive into the `minetest/mods` directory
 
