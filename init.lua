@@ -1,6 +1,8 @@
 -- Minetest Discord Webhook
 -- © 2021 activivan
--- Please reade readme.md for more information
+
+-- Please read readme.md for more information
+
 local http = minetest.request_http_api()
 local conf = minetest.settings
 
