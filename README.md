@@ -2,6 +2,8 @@
 
 This is a simple Minetest mod, that sends Messages to Discord via a Webhook, whenever a user joins or leaves, the server starts or shuts down and on every chat message. With this mod you can easily connect your Mintest game to your Discord server.
 
+<img src="screenshot.png" style="zoom:50%;" />
+
 
 
 ## Getting started
@@ -43,7 +45,9 @@ To install this mod, you have two options:
 
 ### Add mod to http_mods
 
-As this mod uses the Minetest HTTP API to work, it has to be added to the `secure.http_mods` property in the `minetest.conf` file. Alternatively it can be added to `secure.trusted_mods`
+As this mod uses the Minetest HTTP API to work, it has to be added to the `secure.http_mods` property in the `minetest.conf` file. Alternatively it can be added to `secure.trusted_mods`.
+
+***Note:** Due to the need for the Minetest HTTP API, this mod only works on Minetest Servers built with cURL support*
 
 
 
