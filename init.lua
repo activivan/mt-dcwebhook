@@ -61,6 +61,14 @@ local texts = {
         leave2 = "** вышел из игры",
         shutdown = "Сервер выключен",
         start = "Сервер запущен"
+    },
+    nl = {
+        join1 = "Speler **",
+        join2 = "** joint het spel",
+        leave1 = "Speler **",
+        leave2 = "** verliet het spel",
+        shutdown = "Server sluit af",
+        start = "Server is opgestart"
     }
 }
 
