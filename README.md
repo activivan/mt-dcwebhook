@@ -18,9 +18,8 @@ To install this mod, you have two options:
   git clone https://github.com/activivan/mt-dcwebhook.git
   ```
 
-* Download this repository as an Archive: https://github.com/activivan/mt-dcwebhook/archive/refs/heads/master.zip 
+* Download this repository as an archive: https://github.com/activivan/mt-dcwebhook/archive/refs/heads/master.zip and extract the downloaded file into the `minetest/mods` directory. Rename the folder to `dcwebhook`
 
-  Extract the archive into the `minetest/mods` directory
 
 ### Creating a Discord Webhook
 
@@ -37,7 +36,7 @@ To install this mod, you have two options:
    dcwebhook_url = https://discord.com/api/webhooks/blablabla
    ```
 
-6. Optionally you can set the language of the messages with lang codes (currently available: English: `en`, German: `de` and Russian: `ru`)
+6. Optionally you can set the language of the messages with lang codes (currently available: English: `en`, German: `de`, Russian: `ru` and Dutch: `nl`)
 
    ```conf
    lang = de
@@ -53,7 +52,9 @@ As this mod uses the Minetest HTTP API to work, it has to be added to the `secur
 
 # License
 
-Copyright 2021 activivan <activivan.studios@gmail.com>
+MIT License
+
+Copyright (c) 2021 activivan <activivan.studios@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the  "Software"), to deal in the Software without restriction, including  without limitation the rights to use, copy, modify, merge, publish,  distribute, sublicense, and/or sell copies of the Software, and to  permit persons to whom the Software is furnished to do so, subject to  the following conditions:
 
