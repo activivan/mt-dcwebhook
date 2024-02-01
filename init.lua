@@ -39,36 +39,34 @@ end
 
 local texts = {
     en = {
-        join1 = "Player **",
-        join2 = "** joined the game",
-        leave1 = "Player **",
-        leave2 = "** left the game",
+        join = "** joined the game",
+        leave = "** left the game",
         shutdown = "Server shut down",
         start = "Server started"
     },
     de = {
-        join1 = "Spieler **",
-        join2 = "** dem Spiel beigetreten",
-        leave1 = "Spieler **",
-        leave2 = "** hat das Spiel verlassen",
+        join = "** dem Spiel beigetreten",
+        leave = "** hat das Spiel verlassen",
         shutdown = "Server heruntergefahren",
         start = "Server gestartet"
     },
     ru = {
-        join1 = "Игрок **",
-        join2 = "** вошел в игру",
-        leave1 = "Игрок **",
-        leave2 = "** вышел из игры",
+        join = "** вошел в игру",
+        leave = "** вышел из игры",
         shutdown = "Сервер выключен",
         start = "Сервер запущен"
     },
     nl = {
-        join1 = "Speler **",
-        join2 = "** joint het spel",
-        leave1 = "Speler **",
-        leave2 = "** verliet het spel",
+        join = "** joint het spel",
+        leave = "** verliet het spel",
         shutdown = "Server sluit af",
         start = "Server is opgestart"
+    },
+    fr = {
+        join = "** s'est connecté",
+        leave = "** est parti",
+        shutdown = "Arrêt du serveur",
+        start = "Serveur démarré"
     }
 }
 
@@ -76,11 +74,7 @@ minetest.register_on_joinplayer(function(player)
     local name = player:get_player_name()
 
     local data = {
-        content = nil,
-        embeds = {{
-            description = texts[lang].join1 .. name .. texts[lang].join2,
-            color = 5763719
-        }}
+        content = "\\*\\*\\* **" .. name .. texts[lang].join
     }
 
     sendWebhook(data)
@@ -90,11 +84,7 @@ minetest.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
 
     local data = {
-        content = nil,
-        embeds = {{
-            description = texts[lang].leave1 .. name .. texts[lang].leave2,
-            color = 15548997
-        }}
+        content =  "\\*\\*\\* **" .. name .. texts[lang].leave
     }
 
     sendWebhook(data)
@@ -122,7 +112,7 @@ local function startupMessage()
         content = nil,
         embeds = {{
             title = texts[lang].start,
-            description = minetest.get_server_status(),
+            -- description = minetest.get_server_status(),
             color = 5793266
         }}
     }
