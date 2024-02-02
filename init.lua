@@ -1,34 +1,86 @@
 -- Minetest Discord Webhook
--- © 2021 activivan
+-- Version v2.0.0
 
--- Please read readme.md for more information
+-- Copyright © 2021-2024 activivan
+
+-- PLEASE READ README.md FOR MORE INFORMATION
+-- ------------------------------------------
+
 
 local http = minetest.request_http_api()
 local conf = minetest.settings
 
 if not http then
     minetest.log("error",
-        "[Discord Webhook] Can not access HTTP API. Please add this mod to secure.http_mods to grant access")
+        "[Discord Webhook] Can not access HTTP API. Please add this mod to secure.http_mods to grant access.")
     return
 end
 
-if not conf:get("dcwebhook_url") then
-    minetest.log("error", "[Discord Webhook] Discord Webhook URL not set. Please set it in minetest.conf")
-    return
+if not conf:get("dcwebhook.url") then
+    -- Upgrading from v1.x.x
+    if conf:get("dcwebhook_url") then
+        conf:set("dcwebhook.url", conf:get("dcwebhook_url"))
+        conf:remove("dcwebhook_url")
+
+        if conf:get("lang") then
+            conf:set("dcwebhook.lang", conf:get("lang"))
+        end
+
+        minetest.log("warning",
+            "[Discord Webhook] Setting keys for Discord Webhook URL and language changed. More information in dcwebhook/settingtypes.txt")
+
+        if not conf:write() then
+            minetest.log("error", "[Discord Webhook] Failed to migrate setting keys. Please update manually.")
+        end
+    else
+        minetest.log("error", "[Discord Webhook] Discord Webhook URL not set. Please set it in minetest.conf")
+        return
+    end
 end
 
--- Just doing conf:get_bool("lang", "en") did not work for some reason
-if conf:get("lang") then
-    lang = conf:get("lang")
-else
-    lang = "en"
+local function defined(key)
+    local val = conf:get(key)
+    if val == nil or val == "" or val == " " then
+        return nil
+    else
+        return val
+    end
 end
 
-local function sendWebhook(data)
+local texts = dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/texts.lua")
+local lang = defined("dcwebhook.lang") or "en"
+
+-- Use default values if not set
+local get = {
+    send_chat = conf:get_bool("dcwebhook.send_chat", true),
+    send_server_status = conf:get_bool("dcwebhook.send_server_status", true),
+    send_joins = conf:get_bool("dcwebhook.send_joins", true),
+    send_leaves = conf:get_bool("dcwebhook.send_leaves", true),
+
+    name_wrapper = defined("dcwebhook.name_wrapper") or "<**§**>",
+    include_server_status = conf:get_bool("dcwebhook.include_server_status", true),
+
+    startup_text = defined("dcwebhook.startup_text") or texts[lang].startup,
+    shutdown_text = defined("dcwebhook.shutdown_text") or texts[lang].shutdown,
+    join_text = defined("dcwebhook.join_text") or texts[lang].join,
+    leave_text = defined("dcwebhook.leave_text") or texts[lang].leave,
+
+    use_embeds_on_connections = conf:get_bool("dcwebhook.use_embeds_on_connections", true),
+    use_embeds_on_server_updates = conf:get_bool("dcwebhook.use_embeds_on_server_updates", true),
+    notification_prefix = defined("dcwebhook.notification_prefix") or "\\*\\*\\*",
+    
+    startup_color = defined("dcwebhook.startup_color") or 5793266,
+    shutdown_color = defined("dcwebhook.shutdown_color") or nil,
+    join_color = defined("dcwebhook.join_color") or 5763719,
+    leave_color = defined("dcwebhook.leave_color") or 15548997
+}
+
+
+local function send_webhook(data)
     local json = minetest.write_json(data)
 
     http.fetch({
-        url = conf:get("dcwebhook_url"),
+        url = conf:get("dcwebhook.url"),
         method = "POST",
         extra_headers = {"Content-Type: application/json"},
         data = json
@@ -37,97 +89,115 @@ local function sendWebhook(data)
     end)
 end
 
-local texts = {
-    en = {
-        join1 = "Player **",
-        join2 = "** joined the game",
-        leave1 = "Player **",
-        leave2 = "** left the game",
-        shutdown = "Server shut down",
-        start = "Server started"
-    },
-    de = {
-        join1 = "Spieler **",
-        join2 = "** dem Spiel beigetreten",
-        leave1 = "Spieler **",
-        leave2 = "** hat das Spiel verlassen",
-        shutdown = "Server heruntergefahren",
-        start = "Server gestartet"
-    },
-    ru = {
-        join1 = "Игрок **",
-        join2 = "** вошел в игру",
-        leave1 = "Игрок **",
-        leave2 = "** вышел из игры",
-        shutdown = "Сервер выключен",
-        start = "Сервер запущен"
-    },
-    nl = {
-        join1 = "Speler **",
-        join2 = "** joint het spel",
-        leave1 = "Speler **",
-        leave2 = "** verliet het spel",
-        shutdown = "Server sluit af",
-        start = "Server is opgestart"
-    }
-}
 
-minetest.register_on_joinplayer(function(player)
-    local name = player:get_player_name()
+local function perform_registrations()
+    if get.send_chat then
+        minetest.register_on_chat_message(function(name, message)
+            send_webhook({
+                content = get.name_wrapper:gsub("§", name) .. "  " .. message
+            })
+        end)
+    end
 
-    local data = {
-        content = nil,
-        embeds = {{
-            description = texts[lang].join1 .. name .. texts[lang].join2,
-            color = 5763719
-        }}
-    }
+    if get.send_server_status then
+        minetest.register_on_shutdown(function()
+            local data = {}
 
-    sendWebhook(data)
-end)
+            if not get.use_embeds_on_server_updates then
+                data = {
+                    content = get.notification_prefix .. " " .. get.shutdown_text
+                }
+            else
+                data = {
+                    content = nil,
+                    embeds = {{
+                        title = get.shutdown_text,
+                        color = get.shutdown_color
+                    }}
+                }
+            end
 
-minetest.register_on_leaveplayer(function(player)
-    local name = player:get_player_name()
+            send_webhook(data)
+        end)
 
-    local data = {
-        content = nil,
-        embeds = {{
-            description = texts[lang].leave1 .. name .. texts[lang].leave2,
-            color = 15548997
-        }}
-    }
+        local function startup_message()
+            local data = {}
 
-    sendWebhook(data)
-end)
+            if not get.use_embeds_on_server_updates then
+                data = {
+                    content = get.notification_prefix .. " " .. get.startup_text ..
+                        (get.include_server_status and " - " .. minetest.get_server_status() or "")
+                }
+            else
+                data = {
+                    content = nil,
+                    embeds = {{
+                        title = get.startup_text,
+                        description = get.include_server_status and "\\" .. minetest.get_server_status() or nil, -- prefix \\ because Discord interprets description as Markdown
+                        color = get.startup_color
+                    }}
+                }
+            end
 
-minetest.register_on_chat_message(function(name, message)
-    sendWebhook({
-        content = "<**" .. name .. "**>  " .. message
-    })
-end)
+            send_webhook(data)
+        end
 
-minetest.register_on_shutdown(function()
-    local data = {
-        content = nil,
-        embeds = {{
-            title = texts[lang].shutdown
-        }}
-    }
+        startup_message()
+    end
 
-    sendWebhook(data)
-end)
+    if get.send_joins then
+        minetest.register_on_joinplayer(function(player)
+            local name = player:get_player_name()
 
-local function startupMessage()
-    local data = {
-        content = nil,
-        embeds = {{
-            title = texts[lang].start,
-            description = minetest.get_server_status(),
-            color = 5793266
-        }}
-    }
+            local data = {}
 
-    sendWebhook(data)
+            if not get.use_embeds_on_connections then
+                data = {
+                    content = get.notification_prefix .. " " .. get.join_text:gsub("§", name)
+                }
+            else
+                data = {
+                    content = nil,
+                    embeds = {{
+                        description = get.join_text:gsub("§", name),
+                        color = get.join_color
+                    }}
+                }
+            end
+
+            send_webhook(data)
+        end)
+    end
+
+    if get.send_leaves then
+        minetest.register_on_leaveplayer(function(player)
+            local name = player:get_player_name()
+
+            local data = {}
+
+            if not get.use_embeds_on_connections then
+                data = {
+                    content = get.notification_prefix .. " " .. get.leave_text:gsub("§", name)
+                }
+            else
+                data = {
+                    content = nil,
+                    embeds = {{
+                        description = get.leave_text:gsub("§", name),
+                        color = get.leave_color
+                    }}
+                }
+            end
+
+            send_webhook(data)
+        end)
+    end
 end
 
-startupMessage()
+-- Perform registrations after other mods loaded because
+-- * Chat mirroring will work even if there have been overwrites by other mods
+-- * Minetest translation service required for startup message
+
+minetest.after(0, function()
+    perform_registrations()
+end)
