@@ -186,15 +186,16 @@ local function perform_registrations()
                     }
                 end
             else
+                local last_login = get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name)
                 if not get.use_embeds_on_joins then
-                    data = {
-                        content = get.notification_prefix .. " " .. get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name)
+		    data = {
+                        content = get.notification_prefix .. " " .. last_login 
                     }
                 else
                     data = {
                         content = nil,
                         embeds = {{
-                            description = get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name),
+                            description = last_login,
                             color = get.join_color
                         }}
                     }
