@@ -15,8 +15,11 @@
 # Discord Webhook URL the mod should post messages to (required). Instructions on how to obtain can be found in README.md
 dcwebhook.url (Discord Webhook URL) string
 
-# Language for system notifications. Languages available: English: "en", German: "de", Russian: "ru", Dutch: "nl", French: "fr", Spanish: "es" and Italian: "it"
+# Language for system notifications. Languages available: English: "en", German: "de", Russian: "ru", Dutch: "nl", French: "fr", Spanish: "es", Italian: "it", Japanese: "ja", Chinese: "zh", Malay: "ms" and Indonesian: "id". If value invalid, server crashes without warning.
 dcwebhook.lang (Language) string en
+
+# Set the date format string to be used on last logins. Documentation on https://www.lua.org/pil/22.1.html
+dcwebhook.date (Date format string) string %d.%m.%Y %H:%M
 
 
 
@@ -31,17 +34,26 @@ dcwebhook.send_server_status (Mirror server status) bool true
 # Set whether to send notifications when a player joins.
 dcwebhook.send_joins (Notification on player join) bool true
 
+# Set whether to include the last login in notifications when a player joins.
+dcwebhook.send_last_login (Include last login in notification on player join) bool false
+
 # Set whether to send notifications when a player leaves.
 dcwebhook.send_leaves (Notification on player leave) bool true
+
+# Set whether to send special notifications when a player joins for the first time instead of the regular join notification.
+dcwebhook.send_welcomes (Notification on player welcome) bool true
+
+# Set whether to send notifications when a player dies.
+dcwebhook.send_deaths (Notification on player death) bool true
 
 
 
 [Customization]
 
-# Set what the player name should be wrapped in when mirroring chat messages. Use "§" to reference the player name.
+# Set what the player name should be wrapped in when mirroring chat messages. Use "@1" to reference the player name.
 #
-# For example, "<§>" will result in the following Discord message: "<playername> message"
-dcwebhook.name_wrapper (Name wrapper) string <**§**>
+# For example, "<@1>" will result in the following Discord message: "<playername> message"
+dcwebhook.name_wrapper (Name wrapper) string <**@1**>
 
 # Set whether to include minetest.get_server_status() in the server startup notification.
 dcwebhook.include_server_status (Include server status in startup notification) bool true
@@ -55,20 +67,38 @@ dcwebhook.startup_text (Text of notification on server startup) string
 # Set the text of the notification sent on server shut-down. To use built-in, leave blank and set language setting.
 dcwebhook.shutdown_text (Text of notification on server shut-down) string
 
-# Set the text of the notification sent when a player joins. Use "§" to reference the player name. To use built-in, leave blank and set language setting. 
+# Set the text of the notification sent when a player joins. Use "@1" to reference the player name. To use built-in, leave blank and set language setting. 
 dcwebhook.join_text (Text of notification on player join) string
 
-# Set the text of the notification sent when a player leaves. Use "§" to reference the player name. To use built-in, leave blank and set language setting.
+# Set the text of the notification sent when a player joins including the last login. Use "@1" to reference the player name and "@2" to reference the last login. You can set the date format in the dcwebhook.date setting. To use built-in, leave blank and set language setting. 
+dcwebhook.last_login_text (Text of notification on player join including last login) string
+
+# Set the text of the notification sent when a player leaves. Use "@1" to reference the player name. To use built-in, leave blank and set language setting.
 dcwebhook.leave_text (Text of notification on player leave) string
+
+# Set the text of the notification sent when a player joins for the first time. Use "@1" to reference the player name. To use built-in, leave blank and set language setting.
+dcwebhook.welcome_text (Text of notification on player welcome) string
+
+# Set the text of the notification sent when a player dies. Use "@1" to reference the player name. To use built-in, leave blank and set language setting.
+dcwebhook.death_text (Text of notification on player death) string
 
 
 [*Discord embeds]
 
-# Set whether to use Discord embeds (boxes) for notifications on connections (on join and leave).
-dcwebhook.use_embeds_on_connections (Use Discord embeds for connection notifications) bool true
+# Set whether to use Discord embeds (boxes) for notifications when a player joins.
+dcwebhook.use_embeds_on_joins (Use Discord embeds for notifications on player join) bool true
+
+# Set whether to use Discord embeds (boxes) for notifications when a player leaves.
+dcwebhook.use_embeds_on_leaves (Use Discord embeds for notifications on player leave) bool true
+
+# Set whether to use Discord embeds (boxes) for notifications when a player joins for the first time.
+dcwebhook.use_embeds_on_welcomes (Use Discord embeds for notifications on player welcomes) bool true
+
+# Set whether to use Discord embeds (boxes) for notifications when a player dies.
+dcwebhook.use_embeds_on_deaths (Use Discord embeds for notifications on player death) bool true
 
 # Set whether to use Discord embeds (boxes) for notifications on server status updates.
-dcwebhook.use_embeds_on_server_updates (Use Discord embeds for server update notifications) bool true
+dcwebhook.use_embeds_on_server_updates (Use Discord embeds for server status notifications) bool true
 
 # Set the prefix to be put before system notifications when Discord embeds are disabled.
 dcwebhook.notification_prefix (System notification prefix) string \*\*\*
@@ -79,10 +109,16 @@ dcwebhook.notification_prefix (System notification prefix) string \*\*\*
 dcwebhook.startup_color (Startup Discord embed color) string 5793266
 
 # Set the color to be used in the server shut-down notification Discord embed (box). Color has to be a decimal number.
-dcwebhook.shutdown_color (Shut down Discord embed color) string 
+dcwebhook.shutdown_color (Shut down Discord embed color) string
 
 # Set the color to be used in Discord embeds (boxes) for notifications when a player joins. Color has to be a decimal number.
-dcwebhook.join_color (Startup Discord embed color) string 5763719
+dcwebhook.join_color (Join Discord embed color) string 5763719
 
 # Set the color to be used in Discord embeds (boxes) for notifications when a player leaves. Color has to be a decimal number.
-dcwebhook.leave_color (Startup Discord embed color) string 15548997
+dcwebhook.leave_color (Leave Discord embed color) string 15548997
+
+# Set the color to be used in Discord embeds (boxes) for notifications when a player joins for the first time. Color has to be a decimal number.
+dcwebhook.welcome_color (Welcome Discord embed color) string 5763719
+
+# Set the color to be used in Discord embeds (boxes) for notifications when a player dies. Color has to be a decimal number.
+dcwebhook.death_color (Death Discord embed color) string

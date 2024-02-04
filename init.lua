@@ -52,29 +52,49 @@ local lang = defined("dcwebhook.lang") or "en"
 
 -- Use default values if not set
 local get = {
+    date = defined("dcwebhook.date") or "%d.%m.%Y %H:%M",
+
     send_chat = conf:get_bool("dcwebhook.send_chat", true),
     send_server_status = conf:get_bool("dcwebhook.send_server_status", true),
     send_joins = conf:get_bool("dcwebhook.send_joins", true),
+    send_last_login = conf:get_bool("dcwebhook.send_last_login", false),
     send_leaves = conf:get_bool("dcwebhook.send_leaves", true),
+    send_welcomes = conf:get_bool("dcwebhook.send_welcomes", true),
+    send_deaths = conf:get_bool("dcwebhook.send_deaths", true),
 
-    name_wrapper = defined("dcwebhook.name_wrapper") or "<**§**>",
+    name_wrapper = defined("dcwebhook.name_wrapper") or "<**@1**>",
     include_server_status = conf:get_bool("dcwebhook.include_server_status", true),
 
     startup_text = defined("dcwebhook.startup_text") or texts[lang].startup,
     shutdown_text = defined("dcwebhook.shutdown_text") or texts[lang].shutdown,
     join_text = defined("dcwebhook.join_text") or texts[lang].join,
+    last_login_text = defined("dcwebhook.last_login_text") or texts[lang].last_login,
     leave_text = defined("dcwebhook.leave_text") or texts[lang].leave,
+    welcome_text = defined("dcwebhook.welcome_text") or texts[lang].welcome,
+    death_text = defined("dcwebhook.death_text") or texts[lang].death,
 
-    use_embeds_on_connections = conf:get_bool("dcwebhook.use_embeds_on_connections", true),
+    use_embeds_on_joins = conf:get_bool("dcwebhook.use_embeds_on_joins", true),
+    use_embeds_on_leaves = conf:get_bool("dcwebhook.use_embeds_on_leaves", true),
+    use_embeds_on_welcomes = conf:get_bool("dcwebhook.use_embeds_on_welcomes", true),
+    use_embeds_on_deaths = conf:get_bool("dcwebhook.use_embeds_on_deaths", true),
     use_embeds_on_server_updates = conf:get_bool("dcwebhook.use_embeds_on_server_updates", true),
     notification_prefix = defined("dcwebhook.notification_prefix") or "\\*\\*\\*",
-    
+
     startup_color = defined("dcwebhook.startup_color") or 5793266,
-    shutdown_color = defined("dcwebhook.shutdown_color") or nil,
+    shutdown_color = defined("dcwebhook.shutdown_color"),
     join_color = defined("dcwebhook.join_color") or 5763719,
-    leave_color = defined("dcwebhook.leave_color") or 15548997
+    leave_color = defined("dcwebhook.leave_color") or 15548997,
+    welcome_color = defined("dcwebhook.welcome_color") or 5793266,
+    death_color = defined("dcwebhook.death_color")
 }
 
+
+local function replace(str, ...)
+    local arg = {...}
+    return str:gsub("@(.)", function(matched)
+        return arg[tonumber(matched)]
+    end)
+end
 
 local function send_webhook(data)
     local json = minetest.write_json(data)
@@ -94,7 +114,7 @@ local function perform_registrations()
     if get.send_chat then
         minetest.register_on_chat_message(function(name, message)
             send_webhook({
-                content = get.name_wrapper:gsub("§", name) .. "  " .. message
+                content = replace(get.name_wrapper, name) .. "  " .. message
             })
         end)
     end
@@ -146,23 +166,39 @@ local function perform_registrations()
     end
 
     if get.send_joins then
-        minetest.register_on_joinplayer(function(player)
+        minetest.register_on_joinplayer(function(player, last_login)
             local name = player:get_player_name()
 
             local data = {}
 
-            if not get.use_embeds_on_connections then
-                data = {
-                    content = get.notification_prefix .. " " .. get.join_text:gsub("§", name)
-                }
+            if last_login == nil and get.send_welcomes then
+                if not get.use_embeds_on_welcomes then
+                    data = {
+                        content = get.notification_prefix .. " " .. replace(get.welcome_text, name)
+                    }
+                else
+                    data = {
+                        content = nil,
+                        embeds = {{
+                            description = replace(get.welcome_text, name),
+                            color = get.welcome_color
+                        }}
+                    }
+                end
             else
-                data = {
-                    content = nil,
-                    embeds = {{
-                        description = get.join_text:gsub("§", name),
-                        color = get.join_color
-                    }}
-                }
+                if not get.use_embeds_on_joins then
+                    data = {
+                        content = get.notification_prefix .. " " .. get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name)
+                    }
+                else
+                    data = {
+                        content = nil,
+                        embeds = {{
+                            description = get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name),
+                            color = get.join_color
+                        }}
+                    }
+                end
             end
 
             send_webhook(data)
@@ -175,16 +211,40 @@ local function perform_registrations()
 
             local data = {}
 
-            if not get.use_embeds_on_connections then
+            if not get.use_embeds_on_leaves then
                 data = {
-                    content = get.notification_prefix .. " " .. get.leave_text:gsub("§", name)
+                    content = get.notification_prefix .. " " .. replace(get.leave_text, name)
                 }
             else
                 data = {
                     content = nil,
                     embeds = {{
-                        description = get.leave_text:gsub("§", name),
+                        description = replace(get.leave_text, name),
                         color = get.leave_color
+                    }}
+                }
+            end
+
+            send_webhook(data)
+        end)
+    end
+
+    if get.send_deaths then
+        minetest.register_on_dieplayer(function(player)
+            local name = player:get_player_name()
+
+            local data = {}
+
+            if not get.use_embeds_on_deaths then
+                data = {
+                    content = get.notification_prefix .. " " .. replace(get.death_text, name)
+                }
+            else
+                data = {
+                    content = nil,
+                    embeds = {{
+                        description = replace(get.death_text, name),
+                        color = get.death_color
                     }}
                 }
             end

@@ -1,13 +1,13 @@
 # Minetest Discord Webhook
 
-*Version v2.0.0*
+*Version v2.1.0*
 
-This Minetest mod allows you to mirror chat messages, server status updates and player connections to your Discord server. Unlike other mods, this one uses webhooks to directly post messages to Discord - there is no need to run a proxy or waste your time setting up a Discord bot, which makes getting started only a matter of seconds. On top of that, you can literally customize everything! What information you want to be mirrored, what color notification boxes should have, or in what way to style a player name - everything is up to you - and it's available in 7 different languages. Give it a try!
+This Minetest mod allows you to mirror chat messages, server status updates as well as player connections and deaths to your Discord server. Unlike other mods, this one uses webhooks to directly post messages to Discord - there is no need to run a proxy or waste your time setting up a Discord bot, which makes getting started only a matter of seconds. On top of that, you can literally customize everything! What information you want to be mirrored, what color notification boxes should have, or in what way to style a player name - everything is up to you - and it's available in 7 different languages. Give it a try!
 
 <img src="screenshot.png" style="zoom:50%;" />
 
 > [!WARNING]
-> Version v2.0.0 comes with new setting keys. Please head to `settingtypes.txt` to learn more and update your settings!
+> Version v2.1.0 comes with new setting keys. Please head to `settingtypes.txt` to learn more and update your settings!
 
 
 ## Getting started
@@ -40,7 +40,7 @@ The Discord Webhook URL setting is the only one required for this mod to work. P
 dcwebhook.url = https://discord.com/api/webhooks/blablabla
 ```
 
-Optionally, set the language you want the system notifications to be in. Languages currently available: English: `en` (default), German: `de`, Russian: `ru`, Dutch: `nl`, French: `fr`, Spanish: `es` and Italian: `it`
+Optionally, set the language you want the system notifications to be in. Languages currently available: English: `en` (default), German: `de`, Russian: `ru`, Dutch: `nl`, French: `fr`, Spanish: `es`, Italian: `it`, Japanese: `ja`, Chinese: `zh`, Malay: `ms` and Indonesian: `id`
 
 ```conf
 dcwebhook.lang = de
