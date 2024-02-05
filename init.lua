@@ -1,5 +1,5 @@
 -- Minetest Discord Webhook
--- Version v2.1.0
+-- Version v2.1.1
 
 -- Copyright © 2021-2024 activivan
 
@@ -188,7 +188,7 @@ local function perform_registrations()
             else
                 if not get.use_embeds_on_joins then
                     data = {
-                        content = get.notification_prefix .. " " .. get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name)
+                        content = get.notification_prefix .. " " .. (get.send_last_login and replace(get.last_login_text, name, os.date(get.date, last_login)) or replace(get.join_text, name))
                     }
                 else
                     data = {
